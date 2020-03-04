@@ -8,10 +8,11 @@ import get_info
 """
 
 class icmp_packet:
-    def __init__(self, src, dst, smac):
+    def __init__(self, src, dst, smac, port):
         self.src = src
         self.dst = dst
         self.smac = smac
+        self.port = port
 
     def send_icmp_less_field(self):
         """
@@ -30,26 +31,27 @@ class icmp_packet:
         pkt = IP(src = self.src, dst = self.dst)/ICMP()
         pkt["IP"].chksum = 0x1111
         send(pkt)
-    def test(self):
-        pkts = rdpcap("../icmp_malformed_abnormal_bak.pcap")
-        pkt = pkts[0]
-        pkt[IP].dst = self.dst
-        pkt[IP].src = self.src 
-        #pkt[Ether].src = self.smac
-        del pkt[IP].chksum
-        del pkt[Ether].src
-        del pkt[Ether].dst
-        sendp(pkt, iface="wlp9s0")
+    def relay_pcap_by_scapy(self, pcap):
+        pkts = rdpcap(pcap)
+        for pkt in pkts:
+            pkt = pkts[0]
+            pkt[IP].dst = self.dst
+            pkt[IP].src = self.src 
+            #pkt[Ether].src = self.smac
+            del pkt[IP].chksum
+            del pkt[Ether].src
+            del pkt[Ether].dst
+            sendp(pkt, iface=self.port)
 
 if __name__ == '__main__':
-    src = "10.10.10.152"
-    if len(sys.argv) == 3:
-       port = sys.argv[2] 
-    else:
-        port = "eth1"
+    dip = sys.argv[1]
+    port = sys.argv[2] if len(sys.argv) > 2 else "eth1"
 
-    smac, src = get_info.get_mac_and_ip(port)
-    ob = icmp_packet(src, sys.argv[1], smac)
-    ob.test()
+   
+    smac, sip = get_info.get_mac_and_ip(port)
+    ob = icmp_packet(sip, dip, smac, port)
+    d = "/home/yangzhengchu/fortinet/ddos/pcap/"
+    ob.relay_pcap_by_scapy(d + sys.argv[3])
     #ob.send_icmp_bad_checksum()
     #ob.send_ip_bad_checksum()
+
