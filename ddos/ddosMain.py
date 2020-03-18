@@ -1,18 +1,30 @@
 import sys
 import os
+import re
 from scapy.all import *
-import get_info
 
 """
 1. stric icmp abnormal check.
 """
 
-class icmp_packet:
-    def __init__(self, src, dst, smac, port):
-        self.src = src
-        self.dst = dst
-        self.smac = smac
+class ddos_send(object):
+    def __init__(self, port, dst):
+
         self.port = port
+        self.dst = dst
+        self.smac, self.src = self.get_mac_and_ip(self.port)
+
+    def get_mac_and_ip(self, port):
+        if port == "lo":
+            mac, ip = "00:00:00:00:00:00", "127.0.0.1"
+        else:
+            fb = os.popen("ip addr show %s" %port)
+            data = fb.read()
+            pattern = re.compile(r'ether ((?:(?:[0-9a-f]{2}[:]){5})[0-9a-f]{2}).*inet ((?:(?:[0-9]{1,3}\.){3}[0-9]{1,3}))/', re.IGNORECASE|re.S)
+            infos = pattern.search(data).groups()
+            if len(infos) == 2:
+                mac, ip = infos
+        return mac, ip 
 
     def send_icmp_less_field(self):
         """
@@ -40,18 +52,23 @@ class icmp_packet:
             #print(res[NTP].show2())
         return res
 
+    def get_ntp_header(self):
+        print(NTP().show2()) 
 
-    def reply_ntp_version(self, version, mode = 4):
+    def send_ntp_packet(self, data):
+        p = IP(src = self.src, dst = self.dst)/UDP()/NTP(**data)
+        res = sr1(p, inter=0.1, timeout = 0.5)
+        return res
+
+
+    def reply_ntp_packet(self, data):
         pkts = sniff(iface=self.port, count = 1,filter="udp and dst port 123 and ip src %s"%self.dst)
-
         pkt = pkts[0]
-        if pkt[NTP].mode == 3:
-            #print(pkt[NTP].show())
-            p = IP()/UDP()/NTP(mode = 4)
+        if pkt:
+            data.setdefault("mode", 4);
+            p = IP()/UDP()/NTP(**data)
             p.src = pkt[IP].dst
             p.dst = pkt[IP].src
-            p[NTP].version = version
-            p[NTP].mode = mode
             send(p)
         return pkt 
 
@@ -71,9 +88,8 @@ if __name__ == '__main__':
     dip = sys.argv[1]
     port = sys.argv[2] if len(sys.argv) > 2 else "eth1"
 
-   
-    smac, sip = get_info.get_mac_and_ip(port)
-    ob = icmp_packet(sip, dip, smac, port)
+
+    ob = ddos_send(port, dip)
     d = "/home/yangzhengchu/fortinet/ddos/pcap/"
     ob.relay_pcap_by_scapy(d + sys.argv[3])
     #ob.send_icmp_bad_checksum()
