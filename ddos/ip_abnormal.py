@@ -35,18 +35,25 @@ class icmp_packet:
     def send_ntp_version(self, num):
         p = IP(src = self.src, dst = self.dst)/UDP()/NTP()
         p[NTP].version = num
-        sr(p, inter=0.1, timeout = 0.5)
+        res = sr1(p, inter=0.1, timeout = 0.5)
+        #if res:
+            #print(res[NTP].show2())
+        return res
+
 
     def reply_ntp_version(self, version, mode = 4):
         pkts = sniff(iface=self.port, count = 1,filter="udp and dst port 123 and ip src %s"%self.dst)
+
         pkt = pkts[0]
         if pkt[NTP].mode == 3:
+            #print(pkt[NTP].show())
             p = IP()/UDP()/NTP(mode = 4)
             p.src = pkt[IP].dst
             p.dst = pkt[IP].src
             p[NTP].version = version
             p[NTP].mode = mode
             send(p)
+        return pkt 
 
     def relay_pcap_by_scapy(self, pcap):
         pkts = rdpcap(pcap)
