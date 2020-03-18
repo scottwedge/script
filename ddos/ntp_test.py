@@ -11,6 +11,9 @@ def usage():
 
         -t 1 send_ddos_packet
         -t 2 reply_ddos_packet
+
+        -d dst ip
+        -p port
         """)
 
     '''
@@ -26,20 +29,20 @@ def usage():
     
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "v:m:s:i:ht:d:p:", ["version", "mode", "stratum", "id", "help", "type", "dst"])
+        opts, args = getopt.getopt(sys.argv[1:], "v:m:s:i:ht:d:p:", ["version", "mode", "stratum", "id", "help", "type", "dst", "port"])
     except getopt.GetoptError as err:
         usage()
         sys.exit(2)
     d = {}
     method = "send_ntp_packet" 
-    address = "11.1.2.2"
-    port = "lo" 
+    address = os.environ.get('tdip')
+    port = os.environ.get("tport") 
+
     for key, value in opts:
         if key in ("-h", "--help"):
             usage()
             sys.exit(1)
         if key in ("-t", "--type"):
-            print("value" + value);
             if(value== "1"):
                 method = "send_ntp_packet"
             elif(value== "2"):
@@ -50,7 +53,7 @@ def main():
         elif key in ("-d", "--dst"):
             address = value
         elif key in ("-p", "--port"):
-            port = port 
+            port = value 
         elif key in ("-m", "--mode"):
             d["mode"] = int(value);
         elif key in ("-s", "--stratum"):
