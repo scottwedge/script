@@ -16,7 +16,7 @@ class Control_ddos():
         option["port"] = self.port
         option["default_log_level"] = "trace"
         option["alias"] = "ddos1"
-        option["prompt"] = r"(\r\n)?FortiDDoS.*#|.*y\/n\)"
+        option["prompt"] = r"(\r\n)?(FortiDDoS|FI-FDD).*#|.*y\/n\)"
         option["prompt_is_regexp"] = True
         self.telnet_instance.open_connection(**option)
         self.telnet_instance.login(self.username, self.pwd)

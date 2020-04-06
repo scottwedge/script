@@ -76,7 +76,7 @@ class ddos_send(object):
     def relay_pcap_by_scapy(self, pcap):
         pkts = rdpcap(pcap)
         for pkt in pkts:
-            pkt = pkts[0]
+            #pkt = pkts[0]
             pkt[IP].dst = self.dst
             pkt[IP].src = self.src 
             #pkt[Ether].src = self.smac
@@ -84,6 +84,27 @@ class ddos_send(object):
             del pkt[Ether].src
             del pkt[Ether].dst
             sendp(pkt, iface=self.port)
+
+    def relay_control_pcap_by_scapy(self, pcap, ntpdict):
+        pkts = rdpcap(pcap)
+            
+        for pkt in pkts:
+            if ntpdict == None:
+                print(pkt[NTPControl].show2())
+                continue
+            #pkt = pkts[0]
+            for key, value in ntpdict.items():
+                setattr(pkt[NTPControl], key, value)
+            del pkt[UDP].len
+            pkt[IP].dst = self.dst
+            pkt[IP].src = self.src
+            #pkt[Ether].src = self.smac
+            del pkt[IP].chksum
+            del pkt[IP].len
+            del pkt[Ether].src
+            del pkt[Ether].dst
+            sendp(pkt, iface=self.port)
+
 
 if __name__ == '__main__':
     dip = sys.argv[1]

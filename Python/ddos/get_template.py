@@ -3,12 +3,11 @@ import sys
 from jinja2 import Template
 
 basename = "/home/zcyang/fortinet/ddos/autotest/config"
-dirname = "acl"
-
+#basename = "/home/config"
 def get_settings(**args):
     template_file = args.get('template')
     variable_dict = args.get('variable_dict', {})
-    fname = os.path.join(basename, dirname, template_file)
+    fname = os.path.join(basename, template_file)
     print(fname)
     fp = open(fname, 'r')
     data = fp.read()

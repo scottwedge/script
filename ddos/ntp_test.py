@@ -64,6 +64,8 @@ def main():
             source_addr = value 
         elif key in ("-i", "--id"):
             d["id"] = value;
+        elif key in ("-da", "--data"):
+            d["data"] = "a" *int(value);
         else:
             assert False, "option error"
     data = {
