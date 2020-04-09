@@ -105,6 +105,23 @@ class ddos_send(object):
             del pkt[Ether].dst
             sendp(pkt, iface=self.port)
 
+    def relay_private_pcap_by_scapy(self, pkt, ntpdict):
+        if ntpdict == None:
+            print(pkt[NTPPrivate].show2())
+
+        else:
+            for key, value in ntpdict.items():
+                setattr(pkt[NTPPrivate], key, value)
+            del pkt[UDP].len
+            pkt[IP].dst = self.dst
+            pkt[IP].src = self.src
+            #pkt[Ether].src = self.smac
+            del pkt[IP].chksum
+            del pkt[IP].len
+            del pkt[Ether].src
+            del pkt[Ether].dst
+            sendp(pkt, iface=self.port)
+
 
 if __name__ == '__main__':
     dip = sys.argv[1]
