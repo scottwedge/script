@@ -5,6 +5,9 @@ import sys
 from pprint import pprint
 import traceback
 import time
+import yaml 
+from jinja2 import Template
+
 """
     [
         {   direction
@@ -32,12 +35,13 @@ import time
     ]
 """
 
-
-
-parser = argparse.ArgumentParser(description='replay pcap')
-parser.add_argument('pcap', help ="replay pcap")
-parser.add_argument('-y', help ="yaml file")
-parser.add_argument('-d', help ="data info")
+class StoreDictKeyPair(argparse.Action):
+     def __call__(self, parser, namespace, values, option_string=None):
+         my_dict = {}
+         for kv in values.split(","):
+             k,v = kv.split("=")
+             my_dict[k] = v
+         setattr(namespace, self.dest, my_dict)
 
 
 class tool(object):
@@ -45,6 +49,15 @@ class tool(object):
         ip = netifaces.ifaddresses(port)[netifaces.AF_INET][0]['addr']
         mac = netifaces.ifaddresses(port)[netifaces.AF_LINK][0]['addr']
         return (mac, ip)
+
+    def parse_yaml(template, variable_dict = {}):
+        fp = open(template, 'r')
+        data = fp.read()
+        fp.close()
+        template = Template(data)
+        data_handle = template.render(**variable_dict)
+        result = yaml.load(data_handle, Loader = yaml.FullLoader)
+        return result 
 
 
 class generate_data(object):
@@ -61,8 +74,6 @@ class generate_data(object):
 
         self.src= tool.get_ip_mac(self.siface)
         self.dst= tool.get_ip_mac(self.riface)
-
-    
     
     def generate_default(self):
         self.layer2_data = {
@@ -73,7 +84,6 @@ class generate_data(object):
                 "rest_data":[
                 ]
         }
-
         self.layer3_data = {
                 "update_data": {
                     "src": self.src[1], 
@@ -84,15 +94,12 @@ class generate_data(object):
                     "len"
                 ]
         }
-
-
         if self.layer4 == "UDP":
             rest_data = ["len"]
         elif self.layer4 == "TCP":
             rest_data = ["chksum"]
         else:
             rest_data = []
-
         rest_dat = []
         self.layer4_data = {
                 "update_data": {
@@ -100,19 +107,17 @@ class generate_data(object):
                 "rest_data": rest_data
         }
 
-
     def make_data(self):
         self.generate_default()
         d = {}
-        d["id"] = self.data["id"]
-
+        if self.data.get("id", ''):
+            d["id"] = self.data.get("id", '')
         d["send_data"] = {
                 "iface": self.siface,
                 "sleep": 0,
                 "verbose": 0,
                 }
         d["send_data"].update(self.data.get("send_data", {}))
-
         orig_data = self.data.get("pcap_data", {})
         if "Ether" in orig_data:
             self.layer2_data["update_data"].update(orig_data["Ether"].get("update_data", {}))
@@ -120,7 +125,6 @@ class generate_data(object):
             orig_data["Ether"]["rest_data"] = set(self.layer2_data["rest_data"] + (orig_data["Ether"].get("rest_data", [])))
         else:
             orig_data["Ether"] = self.layer2_data
-        
         if "IP" in orig_data:
             self.layer3_data["update_data"].update(orig_data["IP"].get("update_data", {}))
             orig_data["IP"]["update_data"] = self.layer3_data["update_data"]
@@ -153,11 +157,9 @@ class handle_pcap(object):
                 pkt = self.pkts[pcap_id]
                 self.update_pcap(pkt, pcap_data)
                 self.send_pcap(pkt, send_data)
-
         except Exception as e:
             print("function relay_private_pcap_by_scapy error %d %s"%(pcap_id, str(e)))
             traceback.print_exc()
-
 
     def update_pcap(self, pkt, pkt_data):
         try:
@@ -167,7 +169,6 @@ class handle_pcap(object):
                 reset_data = data.get("rest_data", [])
                 for key, value in update_data.items():
                     setattr(pkt[level_obj], key, value)
-                 
                 for key in reset_data: 
                     if key not in update_data:
                         delattr(pkt[level_obj], key)
@@ -186,61 +187,25 @@ class handle_pcap(object):
         sendp(pkt, iface = iface)
 
 
+def usage():
+    parser = argparse.ArgumentParser(description='replay pcap')
+    parser.add_argument('yaml', help ="yaml file")
+    parser.add_argument('pcap', help ="replay pcap")
+    parser.add_argument("--var", dest="var", action=StoreDictKeyPair, metavar="KEY1=VAL1,KEY2=VAL2...")
+    args = parser.parse_args()
+    return args
 
 
 if __name__ == "__main__":
-    print("hello")
-    a = [
-            {
-                # "direction": "inbound",
-                # "protocol": "UDP", 
-                "id":0,
-                "pcap_data":
-                    { 
-                        "NTPPrivate":
-                        {
-                            "update_data":
-                                {
-                                    "version": 4,
-                                }
-                        },
-                        # "IP":
-                        # {
-                        #     "update_data":
-                        #         {
-                        #             "src": "9.9.9.9",
-                        #         },
-                        #         "rest_data":[]
-                        # }
-                    }, 
-
-
-
-               # "send_data":
-               #      {
-               #          #"iface": "eth1",
-               #          "sleep": 1,
-               #          "verbose":0,
-               #      }
-        },
-            {
-                "direction": "outbound",
-                "id":1,
-                "pcap_data":
-                    { 
-                        "NTPPrivate":
-                        {
-                            "update_data":
-                                {
-                                    "version": 4,
-                                }
-                        },
-                    }, 
-        }        
-    ]
-    for i in a:
+    args = usage()
+    pcap_name = args.pcap
+    yaml_name = args.yaml
+    variable_dict = args.var or {}
+    print(pcap_name, yaml_name, variable_dict)
+    yaml_data = tool.parse_yaml(yaml_name, variable_dict)
+    for i in yaml_data:
         obj = generate_data(i)
         data = obj.make_data()
         pprint(data)
-        obj = handle_pcap(sys.argv[1])
+        obj = handle_pcap(pcap_name)
         obj.relay_private_pcap_by_scapy([data])

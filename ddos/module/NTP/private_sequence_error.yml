@@ -1,0 +1,15 @@
+- direction: inbound
+  id: 0
+  pcap_data:
+    IP:
+      rest_data: []
+      update_data: {src: 9.9.9.9}
+    NTPPrivate:
+      update_data: {seq: 0, version: 3}
+  protocol: UDP
+  send_data: {sleep: 1, verbose: 1}
+- direction: outbound
+  id: 1
+  pcap_data:
+    NTPPrivate:
+      update_data: {seq: 1, version: 3}

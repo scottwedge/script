@@ -1,0 +1,6 @@
+- direction: inbound 
+  id: {{id}} 
+  pcap_data:
+    NTPPrivate:
+      update_data: 
+          {{key}} : {{value}}
