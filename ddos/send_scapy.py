@@ -1,3 +1,5 @@
+#/usr/bin/python3
+
 import netifaces
 from scapy.all import *
 import argparse
@@ -55,7 +57,7 @@ def send_scapy_command(command, direction, option):
 def usage():
     parser = argparse.ArgumentParser(description='replay pcap')
     parser.add_argument('--yaml', help ="yaml file")
-    parser.add_argument('--direction', default = "inbound",help ="direction info")
+    parser.add_argument('--direction', default = "inbound", choices = ["inbount" ,"outbound"], help ="direction info")
     parser.add_argument('-v', '--verbose', help ="display recieve detail", action="store_true")    
     parser.add_argument('command', help='scapy command')
     args = parser.parse_args()
