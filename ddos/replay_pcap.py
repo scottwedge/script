@@ -46,8 +46,8 @@ class StoreDictKeyPair(argparse.Action):
 
 class tool(object):
     def get_ip_mac(port):
-        ip = netifaces.ifaddresses(port)[netifaces.AF_INET][0]['addr']
-        mac = netifaces.ifaddresses(port)[netifaces.AF_LINK][0]['addr']
+        ip = get_if_addr(port)
+        mac = get_if_hwaddr(port)
         return (mac, ip)
 
     def parse_yaml(template, variable_dict = {}):
@@ -110,7 +110,7 @@ class generate_data(object):
     def make_data(self):
         self.generate_default()
         d = {}
-        if self.data.get("id", ''):
+        if self.data.get("id", None) is not  None:
             d["id"] = self.data.get("id", '')
         d["send_data"] = {
                 "iface": self.siface,
@@ -168,10 +168,10 @@ class handle_pcap(object):
                 update_data = data.get("update_data", {})
                 reset_data = data.get("rest_data", [])
                 for key, value in update_data.items():
-                    setattr(pkt[level_obj], key, value)
+                    pkt[level_obj].setfieldval(key, value)
                 for key in reset_data: 
                     if key not in update_data:
-                        delattr(pkt[level_obj], key)
+                        pkt[level_obj].delfieldval(key)
         except Exception as e:
             print("update pcap error %s" %str(e))
             traceback.print_exc()

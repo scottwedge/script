@@ -1,14 +1,13 @@
 #/usr/bin/python3
 
-import netifaces
 from scapy.all import *
 import argparse
 import time
 
 class tool(object):
     def get_ip_mac(port):
-        ip = netifaces.ifaddresses(port)[netifaces.AF_INET][0]['addr']
-        mac = netifaces.ifaddresses(port)[netifaces.AF_LINK][0]['addr']
+        ip = get_if_addr(port)
+        mac = get_if_hwaddr(port)
         return (mac, ip)
 
     def parse_yaml(template, variable_dict = {}):
