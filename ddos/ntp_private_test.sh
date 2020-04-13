@@ -58,6 +58,10 @@ then
 	#private itemsize * itemcount > length(ntpraw)
 	python3 send_scapy.py --direction outbound "IP()/UDP()/NTPPrivate(mode=7, nb_items = 4, data_item_size=17, response = 1)/Raw(b'\x00' * 64)"
 else
+
+	#private retran
+	python3 replay_test.py --yaml ${yamldir}private_trans_pass.yml --pcap $pcapname 
+
     #private seq match 
     python3 replay_test.py --yaml ${yamldir}private_sequence_pass_mul.yml --pcap $pcapname 
     python3 replay_test.py --yaml ${yamldir}private_sequence_pass_single.yml --pcap $pcapname

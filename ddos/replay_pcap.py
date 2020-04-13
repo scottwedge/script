@@ -1,4 +1,3 @@
-import netifaces
 from scapy.all import *
 import argparse
 import sys
