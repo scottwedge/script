@@ -143,7 +143,74 @@ case "${type}" in
 					;;										
 			esac			
 		fi
-	;;			
+	;;	
+
+	control)
+		if [ "$action" = "block" ]
+		then
+			case "$index" in
+				1) #control mode request li can not be none
+					python3 send_scapy.py "IP()/UDP(sport = RandNum(1024,65536))/NTPControl(op_code = 1, count = 8, data=b'\x00' * 8, zeros = 1)"
+					;;
+				2) #request error or more is set
+					python3 send_scapy.py "IP()/UDP(sport = RandNum(1024,65536))/NTPControl(op_code = 1, count = 8, data=b'\x00' * 8, err = 1, more = 0)"
+					python3 send_scapy.py "IP()/UDP(sport = RandNum(1024,65536))/NTPControl(op_code = 1, count = 8, data=b'\x00' * 8, more = 1, err = 0)"
+					;;
+				3) #Check NTP Control Request with none zero offset
+					python3 send_scapy.py "IP()/UDP(sport = RandNum(1024,65536))/NTPControl(op_code = 1, count = 8, data=b'\x00' * 8, offset = 1)"
+					;;
+				4) #Check NTP Control Request with reserved OPCODE(0 or >7).
+					python3 send_scapy.py "IP()/UDP(sport = RandNum(1024,65536))/NTPControl(count = 8, data=b'\x00' * 8, op_code = [0, 8])"
+					;;
+				5) #send NTP Control resposne with count values as 0 and more bit set.	
+					python3 send_scapy.py --direction outbound "IP()/UDP(sport=123, dport=123)/NTPControl(response=1, status_word=NTPSystemStatusPacket(), count = 0, more = 1, data = '')"
+					;;
+				6) #1. First response with M=1 with non-zero OFFSET
+					  python3 send_scapy.py "IP()/UDP(sport = 11000, dport = 123)/NTPControl(op_code = 1, count = 8, data=b'\x00' * 8, sequence = 0)"
+                      python3 send_scapy.py --direction outbound "IP()/UDP(dport = 11000, sport = 123)/NTPControl(response=1, status_word=NTPSystemStatusPacket(), op_code = 1, count = 8, data= b'\x00' * 8, more = 1, offset = 1)"
+					;;
+				7) #Response with reserved STATUS values( >7)
+                    python3 send_scapy.py --direction outbound "IP()/UDP()/NTPControl(response=1, err = 1, status_word=NTPErrorStatusPacket(error_code = 8),count = 8, data=b'\x00' * 8, op_code = 1)"
+					;;					
+			esac
+		else
+			case "$index" in
+				1) #contrl mode request li should be none.response li can be not none
+					python3 send_scapy.py "IP()/UDP(sport = 61000)/NTPControl(op_code = 1, count = 8, data=b'\x00' * 8, zeros = 0)"
+					python3 send_scapy.py --direction outbound "IP()/UDP(sport = 123, dport = 61000)/NTPControl(response=1, status_word=NTPSystemStatusPacket(), op_code = 1, count = 8, data=b'\x00' * 8, sequence = 0, zeros = 1)"
+					;;
+				2) #request error or more is not set
+					python3 send_scapy.py "IP()/UDP(sport = RandNum(1024,65536))/NTPControl(op_code = 1, count = 8, data=b'\x00' * 8, more = 0, err = 0)"
+					;;
+				3) #Check NTP Control Request with zero offset
+					python3 send_scapy.py "IP()/UDP(sport = RandNum(1024,65536))/NTPControl(op_code = 1, count = 8, data=b'\x00' * 8, offset = 0)"
+					;;
+				4) #Check NTP Control Request with reserved OPCODE(1,6).
+					python3 send_scapy.py "IP()/UDP(sport = RandNum(1024,65536))/NTPControl(count = 8, data=b'\x00' * 8, op_code = (1, 6))"
+					;;
+				5) #send NTP Control resposne not with count values as 0 and more bit set.
+					python3 send_scapy.py --direction outbound "IP()/UDP(sport=123, dport=123)/NTPControl(response=1, status_word=NTPSystemStatusPacket(), op_code = 1, count = 8, data=b'\x00' * 8, more = 1)"
+					python3 send_scapy.py --direction outbound "IP()/UDP(sport=123, dport=123)/NTPControl(response=1, status_word=NTPSystemStatusPacket(), count = 0, more = 0, data = '')"
+					;;
+				6) #First response with M=1 with non-zero OFFSET
+                    python3 send_scapy.py "IP()/UDP(sport = 12000, dport = 123)/NTPControl(op_code = 1, count = 8, data=b'\x00' * 8, sequence = 0)"
+                    python3 send_scapy.py --direction outbound "IP()/UDP(dport = 12000, sport = 123)/NTPControl(response=1, status_word=NTPSystemStatusPacket(), op_code = 1, count = 8, data= b'\x00' * 8, more = 1, offset = 0)"
+					;;
+				7) #Response with reserved STATUS values( >7)
+                    python3 send_scapy.py --direction outbound "IP()/UDP()/NTPControl(response=1, err = 1, status_word=NTPErrorStatusPacket(error_code = (0,7)),count = 8, data=b'\x00' * 8, op_code = 1)"
+					;;			
+				8) #cache test.
+					python3 send_scapy.py "IP()/UDP(sport = 10000, dport = 123)/NTPControl(op_code = 1, count = 8, data=b'\x00' * 8, sequence = 0)"
+					python3 send_scapy.py --direction outbound "IP()/UDP(dport = 10000, sport = 123)/NTPControl(response=1, status_word=NTPSystemStatusPacket(), op_code = 1, count = 8, data= b'\x00' * 8, more = 1, offset = 0)"
+					python3 send_scapy.py --direction outbound "IP()/UDP(dport = 10000, sport = 123)/NTPControl(response=1, status_word=NTPSystemStatusPacket(), op_code = 1, count = 8, data= b'\x00' * 8, more = 1, offset = 8)"
+					python3 send_scapy.py --direction outbound "IP()/UDP(dport = 10000, sport = 123)/NTPControl(response=1, status_word=NTPSystemStatusPacket(), op_code = 1, count = 8, data= b'\x00' * 8, more = 1, offset = 16)"
+					python3 send_scapy.py --direction outbound "IP()/UDP(dport = 10000, sport = 123)/NTPControl(response=1, status_word=NTPSystemStatusPacket(), op_code = 1, count = 8, data= b'\x00' * 8, more = 0, offset = 24)"
+					;;										
+			esac
+		fi
+	;;		
+
+	
 esac
 
 
