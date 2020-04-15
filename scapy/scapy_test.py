@@ -13,23 +13,20 @@ from jinja2 import Template
 DEFAULT_FUN_DICT = {"RANDIP": RandIP().ip.choice(),
                     "RANDPORT": int(RandNum(1024, 65536)),
                    }
-class EnvTag(yaml.YAMLObject):
-    yaml_tag = u'!SCAPY'
+# class my(): 
+#     def __new__(cls, a, **argv): 
+#          return a(**argv) 
 
-    def __init__(self, obj):
-        self.obj= obj 
 
-    def __repr__(self):
-        v = os.environ.get(self.env_var) or ''
-        return 'EnvTag({}, contains={})'.format(self.env_var, v)
+def my_constructor(loader, node):
+    value = loader.construct_scalar(node)
 
-    @classmethod
-    def from_yaml(cls, loader, node):
-        return EnvTag(node.value)
 
-    @classmethod
-    def to_yaml(cls, dumper, data):
-        return dumper.represent_scalar(cls.yaml_tag, data.env_var)
+    # print(22222222222222222222,dir(loader))
+    return eval(value)
+
+yaml.add_constructor(u'!scapy', my_constructor)
+
 
 class StoreDictKeyPair(argparse.Action):
      def __call__(self, parser, namespace, values, option_string=None):
