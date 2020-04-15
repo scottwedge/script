@@ -1,0 +1,27 @@
+- option:
+    direction: inbound
+  pcap_info:
+  - IP:
+      src: &sip {{RANDIP}}     
+      options: !!python/object:scapy.layers.inet.IP {}
+  - UDP:
+      sport: &sport1 {{RANDPORT}} 
+  - NTP:
+      mode: !!python/tuple [1, 2, 3, 4]
+      version: {{version}}
+  send_info:
+      #sleep: 0.1
+      verbose: NTP
+
+- option:
+    direction: outbound
+  pcap_info:
+  - IP:
+      dst: *sip
+  - UDP:
+      dport: *sport1
+  - NTP:
+      mode: 4
+      version: {{version}}
+  send_info:
+      #sleep: 0.1    

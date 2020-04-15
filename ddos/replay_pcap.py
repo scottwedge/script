@@ -7,9 +7,11 @@ import time
 import yaml 
 from jinja2 import Template
 
+
+
 """
     [
-        {   direction
+        {   directionk
             protocol: tcp
             "id":1,
             "pcap_data":
@@ -71,7 +73,7 @@ class generate_data(object):
             self.siface = "eth2"
             self.riface = "eth1"
 
-        self.src= tool.get_ip_mac(self.siface)
+        self.src= tool.get_ip_mac(self.siface)k
         self.dst= tool.get_ip_mac(self.riface)
     
     def generate_default(self):
