@@ -1,0 +1,31 @@
+- option:
+    direction: inbound
+  pcap_info:
+  - IP: {{RANDIP}}
+  - UDP:
+  - NTP:
+      mode: 1
+      version: 4
+  send_info:
+
+- option:
+    direction: inbound
+  pcap_info:
+  - IP: {{RANDIP}}
+  - UDP:
+  - NTP:
+      mode: 3
+      version: 4
+  send_info:
+
+- option:
+    direction: inbound
+  pcap_info:
+  - Ether: {dst: "ff:ff:ff:ff:ff:ff"}    
+  - IP: {dst: "100.1.1.255"}   
+  - UDP:
+  - NTP:
+      mode: 5
+      version: 4
+      poll:
+  send_info:    

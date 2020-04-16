@@ -3,11 +3,12 @@
   pcap_info:
   - IP:
       src: &sip {{RANDIP}}     
-      options: [!scapy 'IPOption_RR(routers=["1.1.1.1"] * 6)' ]
+      options: [!EVAL 'IPOption_RR(routers=["1.1.1.1"] * 6)' ]
   - UDP:
       sport: &sport1 {{RANDPORT}} 
   - NTP:
-      mode: !!python/tuple [1,3]
+      #mode: !!python/tuple [1,3]
+      mode: !EVAL '(1,3)'
       version: {{version}}
   send_info:
       #sleep: 0.1

@@ -1,0 +1,68 @@
+- option:
+    direction: inbound
+  pcap_info:
+  - IP: 
+      src: 110.1.1.1
+  - UDP:
+  - NTP:
+      mode: 1
+      version: 4
+  send_info:
+
+- option:
+    direction: inbound
+  pcap_info:
+  - IP: 
+      src: 110.1.1.2
+  - UDP:
+  - NTP:
+      mode: 3
+      version: 4
+  send_info:
+      sleep: 55
+
+- option:
+    direction: inbound
+  pcap_info:
+  - IP: 
+      src: 110.1.1.1
+  - UDP:
+  - NTP:
+      mode: 1
+      version: 4
+  send_info:
+
+- option:
+    direction: inbound
+  pcap_info:
+  - IP: 
+      src: 110.1.1.2
+  - UDP:
+  - NTP:
+      mode: 3
+      version: 4
+  send_info:
+      sleep: 7 
+
+- option:
+    direction: inbound
+  pcap_info:
+  - IP: 
+      src: 110.1.1.1
+  - UDP:
+  - NTP:
+      mode: 1
+      version: 4
+  send_info:
+
+- option:
+    direction: inbound
+  pcap_info:
+  - IP: 
+      src: 110.1.1.2
+  - UDP:
+  - NTP:
+      mode: 3
+      version: 4
+  send_info:
+

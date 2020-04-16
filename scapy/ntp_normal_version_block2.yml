@@ -1,0 +1,11 @@
+- option:
+    direction: inbound
+  pcap_info:
+  - IP:
+  - UDP:
+  - NTP:
+      mode: 0
+      version: [0, 5] 
+  send_info:
+      verbose: UDP 
+

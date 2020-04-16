@@ -1,0 +1,40 @@
+- option:
+    direction: inbound
+  pcap_info:
+  - IP: 
+  - UDP:
+  - NTP:
+      mode: 1
+      version: 4
+  send_info:
+
+- option:
+    direction: outbound
+  pcap_info:
+  - IP: 
+  - UDP:
+  - NTP:
+      mode: 2
+      version: 4
+  send_info:
+
+- option:
+    direction: inbound
+  pcap_info:
+  - IP: 
+  - UDP:
+  - NTP:
+      mode: 3
+      version: 4
+  send_info:
+
+- option:
+    direction: outbound
+  pcap_info:
+  - IP: 
+  - UDP:
+  - NTP:
+      mode: 4
+      version: 4
+  send_info:
+

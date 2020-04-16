@@ -1,0 +1,36 @@
+#send ntp packet Stratum (0, 1) and reference id is NULL. 
+- option:
+    direction: inbound
+  pcap_info:
+  - IP:
+  - UDP:
+  - NTP:
+      stratum: [0, 1]
+      id: 0.0.0.0
+      mode: !EVAL (1, 4)
+  send_info:
+
+- option:
+    direction: inbound
+  pcap_info:
+  - Ether: {dst: "01:00:5e:00:01:01"}    
+  - IP: {dst: "224.0.0.1"}    
+  - UDP:
+  - NTP:
+      stratum: [0, 1]
+      id: 0.0.0.0
+      mode: 5
+  send_info:
+
+- option:
+    direction: inbound
+  pcap_info:
+  - Ether: {dst: "ff:ff:ff:ff:ff:ff"}    
+  - IP: {dst: "100.1.1.255"}   
+  - UDP:
+  - NTP:
+      stratum: [0, 1]
+      id: 0.0.0.0
+      mode: 5
+  send_info:    
+

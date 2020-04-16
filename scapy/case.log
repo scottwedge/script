@@ -1,0 +1,255 @@
+Normal mode(1-5) NTP version Anomaly Check,mode field should be zero when version = 1
+1.enable version check, disable Retransmission Check/Unsolicited Response Check
+2.send ntp packet version 1, mode 1-5.
+./scapy_test.py ntp_normal_version_block1.yml
+3.ddos block packets.
+4.send ntp packet version 1, mode 0
+  send ntp packet version 2-4, mode 1. 
+./scapy_test.py ntp_normal_version_forward1.yml
+5.ddos forward packets.
+6.disable version check
+7.repeat step 2
+8.ddos forward packets.
+9.repeat 1-5 for mode 1-4 and mode 5(broadcast and multicast)
+
+
+Normal mode NTP version Anomaly Check,version should be in 1 <= version <= 4
+1.enable version check, disable Retransmission Check/Unsolicited Response Check
+2.send ntp packet version 0, 5 .
+./scapy_test.py ntp_normal_version_block2.yml
+3.ddos block packets.
+4.send ntp packet version 1-4, mode 0
+./scapy_test.py ntp_normal_version_forward2.yml
+5.ddos forward packets.
+6.disable version check
+7.repeat step 2
+8.ddos forward packets.
+9.repeat step 1-8 for mode 1-4 and mode 5(broadcast and multicast)
+
+
+Normal mode NTP Stratum Anomaly Check,stratum should be in 1 < stratum < 15 
+1.enable Stratum check, disable Retransmission Check/Unsolicited Response Check
+2.send ntp packet Stratum 16, 255. 
+./scapy_test.py ntp_normal_stratum_block1.yml
+3.ddos block packets.
+4.send ntp packet Stratum 0, 8, 15.
+./scapy_test.py ntp_normal_stratum_forward1.yml
+5.ddos forward packets.
+6.disable Stratum check
+7.repeat step 2
+8.ddos forward packets.
+9.repeat 1-5 for mode 1-4 and mode 5(broadcast and multicast)
+
+
+Normal mode NTP Stratum Anomaly Check,referince id should be not NULL when stratum > 1.
+1.enable Stratum check, disable Retransmission Check/Unsolicited Response Check
+2.send ntp packet Stratum (2,8,15) and reference id is NULL. 
+./scapy_test.py ntp_normal_stratum_block2.yml
+3.ddos block packets.
+4.send ntp packet Stratum (0, 1) and reference id is NULL. 
+  send ntp packet stratum (2, 8, 15) and reference id is not NULL.
+./scapy_test.py ntp_normal_stratum_forward2.yml
+5.ddos forward packets.
+6.disable Stratum check
+7.repeat step 2
+8.ddos forward packets.
+9.repeat 1-5 for mode 1-4 and mode 5(broadcast and multicast)
+
+Normal NTP retransmission check, mode 1,3,5 retran.
+1.enalble
+2.send retran mode 1,3,block
+3.send retran mode 5 boardcast,block 
+4.send retran mode 5 multicast,block 
+disable
+forward
+./scapy_test.py ntp_normal_retran_block1.yml
+
+
+Normal NTP cache check,mode 1,3 not retran block when timeout
+1.enalble
+2.send 1,3request
+3.wait 55 second,block cause of retran
+3.wait 5 second,forward it.
+4.send 1,3 requst ,do not retran block.
+./scapy_test.py ntp_normal_retran_block2.yml
+
+
+Normal NTP cache check,mode 5 not retran block when poll **2
+1.enalble
+2.send mode 5 boardcast ,poll = 4,need wait 16 second
+3.wait 15 second,send mode 5 boardcast,block by trans.
+4.wait 2 second
+5.send mode 5 boardcast,forward.
+./scapy_test.py ntp_normal_retran_block3.yml
+
+
+Normal NTP cache check,mode 1,3 not retran block when recieve reply 
+1.enalble
+2.send 1,3request
+3.send 1,3request
+4.block because of retran
+5.send 2,4 resposne in server.
+6.repeat step3,ddos forward packets.
+./scapy_test.py ntp_normal_retran_block4.yml
+
+
+Normal unsolicated reply check
+1.enalble
+2.send 2,4 reply
+3.lock because of retran
+4.disable
+5.repeat step 2
+6.ddos forward packets.
+./scapy_test.py ntp_normal_unsol_block.yml
+
+
+Normal 1/3, 2/4 6/6, 7/7 match test.
+1.client send 1,3,6,7 request.
+2.server send 2,4,6,7 response
+./scapy_test.py ntp_normal_mode_forward.yml
+
+
+mismatch mode control test
+
+1.client send mode 1, 3.
+2.block by mode mismatch.
+3.disable .
+4.repeat 1
+5.foreward. 
+./scapy_test.py ntp_normal_mode_block.yml
+
+
+
+
+
+normal data length check,ntp version packet length can not small than 48.
+1.send version2,3,4 length < 48
+python3 send_scapy.py "IP()/UDP(sport=123,dport=123)/Raw(raw(NTP(version = 2))[:-1])"
+python3 send_scapy.py "IP()/UDP(sport=123,dport=123)/Raw(raw(NTP(version = 3))[:-1])"
+python3 send_scapy.py "IP()/UDP(sport=123,dport=123)/Raw(raw(NTP(version = 4))[:-1])"
+2.block packet.
+3.send version2,3,4 length = 48
+python3 send_scapy.py "IP()/UDP(sport=123,dport=123)/Raw(raw(NTP(version = 2)))"
+python3 send_scapy.py "IP()/UDP(sport=123,dport=123)/Raw(raw(NTP(version = 3)))"
+python3 send_scapy.py "IP()/UDP(sport=123,dport=123)/Raw(raw(NTP(version = 4)))"
+4.forward packet.
+5.disable 
+6.repeat step 2
+7.forward pcap
+
+
+normal version 1 len > 48 error.
+1.send version 2 length > 48
+python3 send_scapy.py "IP()/UDP()/NTP(version = 1)/Raw(b"\x00" * 12)"
+python3 send_scapy.py "IP()/UDP()/NTP(version = 1)/Raw(b"\x00" * 4)"
+python3 send_scapy.py "IP()/UDP()/NTP(version = 1)/Raw(b"\x00" * 1)"
+2.block packet.
+3.disable
+4.repeat 2
+5.enable
+
+
+normal version 2/3 do not eq 48 or 60
+1.send version 2 length > 48
+python3 send_scapy.py "IP()/UDP()/NTP(version = (2,3))/Raw(b"\x00" * 8)"
+python3 send_scapy.py "IP()/UDP()/NTP(version = (2,3))/Raw(b"\x00" * 13)"
+python3 send_scapy.py "IP()/UDP()/NTP(version = (2,3))/Raw(b"\x00" * 16)"   
+2.block packet.
+3.send version 2/3 48 or 60
+python3 send_scapy.py "IP()/UDP()/NTP(version = (2,3))"
+python3 send_scapy.py "IP()/UDP()/NTP(version = [2,3])/Raw(b"\x00" * 12)"
+4.forward packet.
+5.disable
+6.repeat 2
+7.forward
+
+
+
+normal version 4 when 0 < len - 48 < 24,have data no option,len -48 %4 should be 0.
+1.send len -48 %4 != 0.
+python3 send_scapy.py "IP()/UDP()/NTP(version = 4)/Raw(b"\x00" * 3)"
+python3 send_scapy.py "IP()/UDP()/NTP(version = 4)/Raw(b"\x00" * 22)"
+2.block packet.
+3.send len -48 %4 == 0
+python3 send_scapy.py "IP()/UDP()/NTP(version = 4)/Raw(b"\x00" * 4)"
+python3 send_scapy.py "IP()/UDP()/NTP(version = 4)/Raw(b"\x00" * 20)"
+python3 send_scapy.py "IP()/UDP()/NTP(version = 4)/Raw(b"\x00" * 24)"
+4.forward
+5.disable
+6.repeat 2
+7.enable
+
+
+normal version 4 when len - 48 > 24,have extension,len extension len %4 == 0.
+1.send extension len  %4 != 0.
+python3 send_scapy.py "IP()/UDP()/NTP()/NTPExtension(type=1, len=31,value=b'\x01' * 30)"
+python3 send_scapy.py "IP()/UDP()/NTP()/NTPExtension(type=1, len=36,value=b'\x01' * 30)/NTPExtension(type=1, len=35,value=b'\x01' * 30)"
+2.block packet.
+3.send extension len  %4 == 0.
+python3 send_scapy.py "IP()/UDP()/NTP()/NTPExtension(type=1, len=32,value=b'\x01' * 30)"
+python3 send_scapy.py "IP()/UDP()/NTP()/NTPExtension(type=1, len=36,value=b'\x01' * 30)/NTPExtension(type=1, len=36,value=b'\x01' * 30)"
+4.forward
+5.disable
+6.repeat 2
+7.enable
+
+
+
+
+normal version 4 when len - 48 > 24,extension len + 48 <= ntp len
+1.send sum all extesion length field + 48 > ntp len 
+python3 send_scapy.py "IP()/UDP()/NTP()/NTPExtension(type=1, len=36,value=b'\x01' * 30)/NTPExtension(type=1, len=37,value=b'\x01' * 30)"
+2.block packet.
+3.send sum all extesion length field + 48 <= ntp len 
+python3 send_scapy.py "IP()/UDP()/NTP()/NTPExtension(type=1, len=36,value=b'\x01' * 30)/NTPExtension(type=1, len=36,value=b'\x01' * 30)"
+python3 send_scapy.py "IP()/UDP()/NTP()/NTPExtension(type=1, len=36,value=b'\x01' * 30)/NTPExtension(type=1, len=32,value=b'\x01' * 30)"
+4.forward
+5.disable
+6.repeat 2
+7.enable
+
+
+
+
+
+
+
+normal version 1 len > 48 error.
+1.send version 2 length > 48
+python3 send_scapy.py ""
+2.block packet.
+3.disable
+4.repeat 2
+5.enable
+loop all mode pair.
+
+
+
+
+
+  leap= no warning
+  version= 4
+  mode= client
+  stratum= 2
+  poll= 10
+  precision= 0
+  delay= 0.0
+  dispersion= 0.0
+  id= 127.0.0.1
+  ref= 0.0
+  orig= Thu, 16 Apr 2020 05:21:17 +0000
+  recv= 0.0
+  sent= Thu, 16 Apr 2020 05:21:17 +0000
+
+
+      <field name="ntp.flags.li" showname="00.. .... = Leap Indicator: no warning (0)" size="1" pos="42" show="0" value="0" unmaskedvalue="25"/>
+      <field name="ntp.flags.vn" showname="..10 0... = Version number: NTP Version 4 (4)" size="1" pos="42" show="4" value="4" unmaskedvalue="25"/>
+      <field name="ntp.flags.mode" showname=".... .101 = Mode: broadcast (5)" size="1" pos="42" show="5" value="5" unmaskedvalue="25"/>
+    </field>
+    <field name="ntp.stratum" showname="Peer Clock Stratum: secondary reference (15)" size="1" pos="43" show="15" value="0f"/>
+    <field name="ntp.ppoll" showname="Peer Polling Interval: 10 (1024 sec)" size="1" pos="44" show="10" value="0a"/>
+    <field name="ntp.precision" showname="Peer Clock Precision: 1.000000 sec" size="1" pos="45" show="0" value="00"/>
+    <field name="ntp.rootdelay" showname="Root Delay:    0.0000 sec" size="4" pos="46" show="0" value="00000000"/>
+    <field name="ntp.rootdispersion" showname="Root Dispersion:    0.0000 sec" size="4" pos="50" show="0" value="00000000"/>
+    <field name="ntp.refid" showname="Reference ID: 99.190.54.185" size="4" pos="54" show="63:be:36:b9" value="63be36b9"/>
+    <field name="ntp.reftime" showname="Reference Timestamp: Jan  1, 1970 00:00:00.000000000 UTC" size="8" pos="58" show="&quo

@@ -1,0 +1,9 @@
+- option:
+    direction: inbound
+  pcap_info:
+  - IP: {{RANDIP}}
+  - UDP: {sport: 123, dport: 123}
+  - RAW:
+      mode: 1
+      version: 4
+  send_info:

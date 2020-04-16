@@ -13,20 +13,14 @@ from jinja2 import Template
 DEFAULT_FUN_DICT = {"RANDIP": RandIP().ip.choice(),
                     "RANDPORT": int(RandNum(1024, 65536)),
                    }
-# class my(): 
-#     def __new__(cls, a, **argv): 
-#          return a(**argv) 
-
 
 def my_constructor(loader, node):
     value = loader.construct_scalar(node)
-
-
-    # print(22222222222222222222,dir(loader))
     return eval(value)
 
-yaml.add_constructor(u'!scapy', my_constructor)
+yaml.add_constructor(u'!EVAL', my_constructor)
 
+ 
 
 class StoreDictKeyPair(argparse.Action):
      def __call__(self, parser, namespace, values, option_string=None):
@@ -104,6 +98,8 @@ class generate_pkt(object):
                 if not layer_obj:
                     pkt.add_payload(eval(layer)())
                     layer_obj = pkt.getlayer(eval(layer))
+                if layerinfo is None:
+                    continue
                 for key, value in layerinfo.items():
                     layer_obj.setfieldval(key, value)
         return pkt
@@ -119,11 +115,17 @@ class send_pcap(object):
         sendp(pkt, iface = send_info["siface"])
         res = t.stop()
 
-        sleep_time = send_info.get("sleep", 0)
-        if sleep_time:
-            time.sleep(sleep_time)
-
         verbose = send_info.get("verbose", None)
+        print("recv %d packets"%len(res));
+
+        """
+        slen = len(pkt)
+        rlen = len(res)
+        if(slen != rlen):
+            print("!!!!!! send %d packets recieve %d packets loss %d packets "%(slen, rlen, slen - rlen))
+        else:
+            print("###### send %d packets recieve %d packets loss %d packets "%(slen, rlen, slen - rlen))
+        """
         if verbose:
             for pkt in res:
                 layer = pkt.getlayer(eval(verbose))
@@ -132,7 +134,10 @@ class send_pcap(object):
 
         else:
             res.nsummary()
-
+            
+        sleep_time = send_info.get("sleep", 0)
+        if sleep_time:
+            time.sleep(sleep_time)
 
 
 class handle_result(object):
@@ -169,10 +174,16 @@ class handle_process(object):
     	#return result
 
 def main(args):
+    """
     template = args.yaml
     variable_dict = args.var or {}
     template_data = template_parse(template).parse_yaml(variable_dict)
     handle_process().run(template_data)
+    """
+    template = args.yaml
+    variable_dict = args.var or {}
+    template_data = template_parse(template).parse_yaml(variable_dict)
+    handle_process(template_data).run()
 	
 
 def usage():
@@ -201,6 +212,14 @@ def test(args):
         variable_dict = args.var or {}
         template_data = template_parse(template).parse_yaml(variable_dict)
         handle_process(template_data).run()
+    if args.test == 4:
+        template = args.yaml
+        variable_dict = args.var or {}
+        template_data = template_parse(template).parse_yaml(variable_dict)
+        while(1):
+            handle_process(template_data).run()        
+            time.sleep(0.9)
+            os.system("date")
 
 if __name__ == "__main__":
     args = usage()
