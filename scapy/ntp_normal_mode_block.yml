@@ -1,9 +1,0 @@
-- option:
-    direction: inbound
-  pcap_info:
-  - IP: {{RANDIP}}
-  - UDP:
-  - NTP:
-      mode: [1, 3] 
-      version: 4
-  send_info:

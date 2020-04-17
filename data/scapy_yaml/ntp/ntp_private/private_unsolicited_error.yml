@@ -1,0 +1,7 @@
+- direction: outbound
+  id: 1
+  pcap_data:
+    NTPPrivate:
+      update_data: 
+          seq: 0 
+          more: 0

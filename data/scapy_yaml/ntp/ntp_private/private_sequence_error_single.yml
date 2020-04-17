@@ -1,0 +1,12 @@
+- direction: inbound
+  id: 0
+  pcap_data:
+    NTPPrivate:
+      update_data: 
+          seq: 0 
+- direction: outbound
+  id: 1
+  pcap_data:
+    NTPPrivate:
+      update_data: 
+          seq: 1 

@@ -10,6 +10,9 @@ import yaml
 from jinja2 import Template
 
 
+global TRACEINFO 
+TRACEINFO = '#####\n'
+
 DEFAULT_FUN_DICT = {"RANDIP": RandIP().ip.choice(),
                     "RANDPORT": int(RandNum(1024, 65536)),
                    }
@@ -113,10 +116,16 @@ class send_pcap(object):
         t.start()
         time.sleep(0.2)    
         sendp(pkt, iface = send_info["siface"])
+        #os.system("date")
         res = t.stop()
 
         verbose = send_info.get("verbose", None)
         print("recv %d packets"%len(res));
+        global TRACEINFO
+        cache =  os.popen('python3 /home/script/tmp.py s2').read()
+        cache = cache.replace("\n\n",'\n').replace(" \n/#", "\n")
+        print("cache info\n", cache)
+        TRACEINFO = TRACEINFO + cache
 
         """
         slen = len(pkt)
@@ -138,7 +147,6 @@ class send_pcap(object):
         sleep_time = send_info.get("sleep", 0)
         if sleep_time:
             time.sleep(sleep_time)
-
 
 class handle_result(object):
     pass
@@ -212,14 +220,14 @@ def test(args):
         variable_dict = args.var or {}
         template_data = template_parse(template).parse_yaml(variable_dict)
         handle_process(template_data).run()
-    if args.test == 4:
-        template = args.yaml
-        variable_dict = args.var or {}
-        template_data = template_parse(template).parse_yaml(variable_dict)
-        while(1):
-            handle_process(template_data).run()        
-            time.sleep(0.9)
-            os.system("date")
+    #if args.test == 4:
+    template = args.yaml
+    variable_dict = args.var or {}
+    template_data = template_parse(template).parse_yaml(variable_dict)
+    handle_process(template_data).run()  
+    global TRACEINFO
+    print(TRACEINFO)
+    
 
 if __name__ == "__main__":
     args = usage()

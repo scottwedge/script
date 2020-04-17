@@ -1,0 +1,54 @@
+- direction: inbound
+  id: 0
+  pcap_data:
+    NTPPrivate:
+      update_data: 
+        implementation: 1
+    UDP:
+      update_data: 
+        sport: 10000
+- direction: inbound
+  id: 0
+  pcap_data:
+    NTPPrivate:
+      update_data: 
+        implementation: 2
+    UDP:
+      update_data: 
+        sport: 10000
+- direction: inbound
+  id: 0
+  pcap_data:
+    NTPPrivate:
+      update_data: 
+        request_code: 1
+    UDP:
+      update_data: 
+        sport: 20000
+- direction: inbound
+  id: 0
+  pcap_data:
+    NTPPrivate:
+      update_data: 
+        request_code: 2
+    UDP:
+      update_data: 
+        sport: 20000
+- direction: inbound
+  id: 0
+  pcap_data:
+    NTPPrivate:
+      update_data: 
+        request_code: 1
+    UDP:
+      update_data: 
+        sport: 30000
+- direction: inbound
+  id: 0
+  pcap_data:
+    NTPPrivate:
+      update_data: 
+        request_code: 1
+    UDP:
+      update_data: 
+        sport: 30001
