@@ -131,9 +131,9 @@ class send_pcap(object):
         slen = len(pkt)
         rlen = len(res)
         if(slen != rlen):
-            print("!!!!!! send %d packets recieve %d packets loss %d packets "%(slen, rlen, slen - rlen))
+            print("!!!!!! send %d packets receive %d packets loss %d packets "%(slen, rlen, slen - rlen))
         else:
-            print("###### send %d packets recieve %d packets loss %d packets "%(slen, rlen, slen - rlen))
+            print("###### send %d packets receive %d packets loss %d packets "%(slen, rlen, slen - rlen))
         """
         if verbose:
             for pkt in res:
